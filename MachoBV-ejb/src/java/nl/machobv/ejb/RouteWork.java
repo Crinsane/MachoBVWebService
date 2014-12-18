@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import javax.ejb.Stateless;
 
@@ -19,31 +20,39 @@ import javax.ejb.Stateless;
  */
 @Stateless
 public class RouteWork implements RouteWorkLocal {
+    
+    String url = "jdbc:mysql://localhost:3306/macho";
+    String driver = "com.mysql.jdbc.Driver";
+        
+    String userName = "root";
+    String password = "root";
+    
+    Connection con = null;
+            
+    
+    public RouteWork()
+    {
+        try
+        {
+            Class.forName(this.driver).newInstance();
+        
+            con = DriverManager.getConnection(url, userName, password);
+        } catch(Exception ex) {
+            
+        }
+    }
 
     @Override
     public RouteData getRouteData(String origin, String destination, Date travelDateTime) {
-        
-        Connection con = null;
-        String url = "jdbc:mysql://localhost:3306/macho";
-        String driver = "com.mysql.jdbc.Driver";
-        
-        String userName = "root";
-        String password = "root";
+        String originID;
+        String destinationID;
         
         try {
-            Class.forName(driver).newInstance();
-            con = DriverManager.getConnection(url, userName, password);
+            originID = getOriginID(origin);
+            destinationID = getDestinationID(destination);
             
-            PreparedStatement st =
-                    con.prepareStatement("SELECT name FROM city WHERE name LIKE ? LIMIT 1");
-            st.setString(1, "%" + origin + "%");
-            
-            ResultSet result = st.executeQuery();
-            
-            while (result.next()) {
-                System.out.println(result.getString(1));
-            }
-            
+            System.out.println(originID);
+            System.out.println(destinationID);
             
         } catch (Exception ex) {
             System.out.println("Exception");
@@ -63,6 +72,40 @@ public class RouteWork implements RouteWorkLocal {
         return routeData;
     }
 
+    private String getDestinationID(String destination) throws SQLException {
+        PreparedStatement st = 
+                con.prepareStatement("SELECT id FROM city WHERE name LIKE ? LIMIT 1");
+        st.setString(1, "%" + destination + "%");
+        
+        ResultSet result;
+        result = st.executeQuery();
+        
+        String destinationID = "";
+        
+        result.next();
+        
+        destinationID = result.getString(1);
+        
+        return destinationID;
+    }
+
     // Add business logic below. (Right-click in editor and choose
     // "Insert Code > Add Business Method")
+
+    private String getOriginID(String origin) throws SQLException {
+        PreparedStatement st =
+                con.prepareStatement("SELECT id FROM city WHERE name LIKE ? LIMIT 1");
+        st.setString(1, "%" + origin + "%");
+        
+        ResultSet result;
+        result = st.executeQuery();
+        
+        String originID = "";
+        
+        result.next();
+        
+        originID = result.getString(1);
+        
+        return originID;
+    }
 }
