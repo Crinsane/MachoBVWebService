@@ -1,0 +1,5 @@
+.DS_Store
+MachoBV-ejb/dist/MachoBV-ejb.jar
+MachoBV-war/dist/MachoBV-war.war
+build/MachoBV-ejb.jar
+build/MachoBV-war.war
